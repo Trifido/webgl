@@ -103,69 +103,8 @@ void main(void) {\n\
   GL.enableVertexAttribArray(_position);
   
   GL.useProgram(SHADER_PROGRAM);
-      GL.uniform1i(_sampler, 0);
-  
-  /*========================= THE SPHERE ========================= */
-  //POINTS :
-  
-    var latitudeBands = 30;
-	var longitudeBands = 30;
-	var radius = 2;
-	var vertex = [];
-	
-	for (var latNumber=0; latNumber <= latitudeBands; latNumber++) {
-		var theta = latNumber * Math.PI / latitudeBands;
-		var sinTheta = Math.sin(theta);
-		var cosTheta = Math.cos(theta);
-
-		for (var longNumber=0; longNumber <= longitudeBands; longNumber++) {
-			var phi = longNumber * 2 * Math.PI / longitudeBands;
-			var sinPhi = Math.sin(phi);
-			var cosPhi = Math.cos(phi);
-
-			var x = cosPhi * sinTheta;
-			var y = cosTheta;
-			var z = sinPhi * sinTheta;
-			var u = 1 - (longNumber / longitudeBands);
-			var v = 1 - (latNumber / latitudeBands);
-
-			//normalData.push(x);
-			//normalData.push(y);
-			//normalData.push(z);
-			
-			vertex.push(radius * x);
-			vertex.push(radius * y);
-			vertex.push(radius * z);
-			vertex.push(u);
-			vertex.push(v);
-		}
-	}
-	
-    var VERTEX= GL.createBuffer ();
-    GL.bindBuffer(GL.ARRAY_BUFFER, VERTEX);
-    GL.bufferData(GL.ARRAY_BUFFER,new Float32Array(vertex),GL.STATIC_DRAW);
-    
-    //FACES :
-   	
-	var faces = [];
-	for (var latNumber=0; latNumber < latitudeBands; latNumber++) {
-		for (var longNumber=0; longNumber < longitudeBands; longNumber++) {
-			var first = (latNumber * (longitudeBands + 1)) + longNumber;
-			var second = first + longitudeBands + 1;
-			faces.push(first);
-			faces.push(second);
-			faces.push(first + 1);
-
-			faces.push(second);
-			faces.push(second + 1);
-			faces.push(first + 1);
-		}
-	}
-	
-  var FACES= GL.createBuffer ();
-  GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, FACES);
-  GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, new Uint16Array(faces), GL.STATIC_DRAW);
-				
+  GL.uniform1i(_sampler, 0);
+  				
   /*========================= MATRIX ========================= */
   
   var PROJMATRIX=LIBS.get_projection(40, CANVAS.width/CANVAS.height, 1, 100);
@@ -213,7 +152,8 @@ void main(void) {\n\
         return image;
     };
     
-    var cube_texture=get_texture("ressources/texture.png");
+    var terra_texture=get_texture("ressources/texture.png");
+	var moon_texture=get_texture("ressources/texture.png");
     
     
   /*========================= DRAWING ========================= */
@@ -241,18 +181,32 @@ void main(void) {\n\
     GL.uniformMatrix4fv(_Pmatrix, false, PROJMATRIX);
     GL.uniformMatrix4fv(_Vmatrix, false, VIEWMATRIX);
     GL.uniformMatrix4fv(_Mmatrix, false, MOVEMATRIX);
-        if (cube_texture.webglTexture) {
+        if (terra_texture.webglTexture) {
         
             GL.activeTexture(GL.TEXTURE0);
             
-            GL.bindTexture(GL.TEXTURE_2D, cube_texture.webglTexture);
+            GL.bindTexture(GL.TEXTURE_2D, terra_texture.webglTexture);
         }
-    GL.bindBuffer(GL.ARRAY_BUFFER, VERTEX);  
+		
+	//TIERRA
+	var terra_vertex = LIBS.sphere_vertex(2,30); 
+	
+    var TERRA_VERTEX= GL.createBuffer ();
+    GL.bindBuffer(GL.ARRAY_BUFFER, TERRA_VERTEX);
+    GL.bufferData(GL.ARRAY_BUFFER,new Float32Array(terra_vertex),GL.STATIC_DRAW);
+   	
+	var terra_faces = LIBS.sphere_faces(30);
+	
+  	var TERRA_FACES= GL.createBuffer ();
+  	GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, TERRA_FACES);
+  	GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, new Uint16Array(terra_faces), GL.STATIC_DRAW);	
+	
+    GL.bindBuffer(GL.ARRAY_BUFFER, TERRA_VERTEX);  
     GL.vertexAttribPointer(_position, 3, GL.FLOAT, false,4*(3+2),0) ;    
     GL.vertexAttribPointer(_uv, 2, GL.FLOAT, false,4*(3+2),3*4) ;        
       
-    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, FACES);
-    GL.drawElements(GL.TRIANGLES, faces.length , GL.UNSIGNED_SHORT, 0);
+    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, TERRA_FACES);
+    GL.drawElements(GL.TRIANGLES, terra_faces.length , GL.UNSIGNED_SHORT, 0);
     
     GL.flush();
     window.requestAnimationFrame(animate);
