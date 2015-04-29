@@ -105,128 +105,67 @@ void main(void) {\n\
   GL.useProgram(SHADER_PROGRAM);
       GL.uniform1i(_sampler, 0);
   
-  /*========================= THE CUBE ========================= */
+  /*========================= THE SPHERE ========================= */
   //POINTS :
-  var cube_vertex=[
-    -1,-1,-1,    0,0,
-    1,-1,-1,     1,0,
-    1, 1,-1,     1,1,
-    -1, 1,-1,    0,1,
-    
-    -1,-1, 1,    0,0,
-    1,-1, 1,     1,0,
-    1, 1, 1,     1,1,
-    -1, 1, 1,    0,1,
-    
-    -1,-1,-1,    0,0,
-    -1, 1,-1,    1,0,
-    -1, 1, 1,    1,1,
-    -1,-1, 1,    0,1,
-    
-    1,-1,-1,     0,0,
-    1, 1,-1,     1,0,
-    1, 1, 1,     1,1,
-    1,-1, 1,     0,1,
-    
-    -1,-1,-1,    0,0,
-    -1,-1, 1,    1,0,
-    1,-1, 1,     1,1,
-    1,-1,-1,     0,1,
-    
-    -1, 1,-1,    0,0,
-    -1, 1, 1,    1,0,
-    1, 1, 1,     1,1,
-    1, 1,-1,     0,1       
-  ];
-    
-    var CUBE_VERTEX= GL.createBuffer ();
-    GL.bindBuffer(GL.ARRAY_BUFFER, CUBE_VERTEX);
-    GL.bufferData(GL.ARRAY_BUFFER,
-    new Float32Array(cube_vertex),
-    GL.STATIC_DRAW);
-    
-    //FACES :
-    var cube_faces = [
-    0,1,2,
-    0,2,3,
-    
-    4,5,6,
-    4,6,7,
-    
-    8,9,10,
-    8,10,11,
-    
-    12,13,14,
-    12,14,15,
-    
-    16,17,18,
-    16,18,19,
-    
-    20,21,22,
-    20,22,23
-    
-  ];
-  var CUBE_FACES= GL.createBuffer ();
-  GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, CUBE_FACES);
-  GL.bufferData(GL.ELEMENT_ARRAY_BUFFER,
-                new Uint16Array(cube_faces),
-                GL.STATIC_DRAW);
-				
-				
-				
- /*========================= SPHERE ========================= */
-	var moonVertexPositionBuffer;
-	var moonVertexNormalBuffer;
-	var moonVertexTextureCoordBuffer;
-	var moonVertexIndexBuffer;
-	function createSphere() {
-		var latitudeBands = 30;
-		var longitudeBands = 30;
-		var radius = 2;
-		var vertexPositionData = [];
-		var normalData = [];
-		var textureCoordData = [];
-		for (var latNumber = 0; latNumber <= latitudeBands; latNumber++) {
-			var theta = latNumber * Math.PI / latitudeBands;
-			var sinTheta = Math.sin(theta);
-			var cosTheta = Math.cos(theta);
-
-			for (var longNumber = 0; longNumber <= longitudeBands; longNumber++) {
-				var phi = longNumber * 2 * Math.PI / longitudeBands;
-				var sinPhi = Math.sin(phi);
-				var cosPhi = Math.cos(phi);
-
-				var x = cosPhi * sinTheta;
-				var y = cosTheta;
-				var z = sinPhi * sinTheta;
-				var u = 1 - (longNumber / longitudeBands);
-				var v = 1 - (latNumber / latitudeBands);
-
-				normalData.push(x);
-				normalData.push(y);
-				normalData.push(z);
-				textureCoordData.push(u);
-				textureCoordData.push(v);
-				vertexPositionData.push(radius * x);
-				vertexPositionData.push(radius * y);
-				vertexPositionData.push(radius * z);
-			  }
-		}
-		var indexData = [];
-		for (var latNumber = 0; latNumber < latitudeBands; latNumber++) {
-			for (var longNumber = 0; longNumber < longitudeBands; longNumber++) {
-				var first = (latNumber * (longitudeBands + 1)) + longNumber;
-				var second = first + longitudeBands + 1;
-				indexData.push(first);
-				indexData.push(second);
-				indexData.push(first + 1);
+  
+    var latitudeBands = 30;
+	var longitudeBands = 30;
+	var radius = 2;
+	var vertex = [];
 	
-				indexData.push(second);
-				indexData.push(second + 1);
-				indexData.push(first + 1);
-			}
+	for (var latNumber=0; latNumber <= latitudeBands; latNumber++) {
+		var theta = latNumber * Math.PI / latitudeBands;
+		var sinTheta = Math.sin(theta);
+		var cosTheta = Math.cos(theta);
+
+		for (var longNumber=0; longNumber <= longitudeBands; longNumber++) {
+			var phi = longNumber * 2 * Math.PI / longitudeBands;
+			var sinPhi = Math.sin(phi);
+			var cosPhi = Math.cos(phi);
+
+			var x = cosPhi * sinTheta;
+			var y = cosTheta;
+			var z = sinPhi * sinTheta;
+			var u = 1 - (longNumber / longitudeBands);
+			var v = 1 - (latNumber / latitudeBands);
+
+			//normalData.push(x);
+			//normalData.push(y);
+			//normalData.push(z);
+			
+			vertex.push(radius * x);
+			vertex.push(radius * y);
+			vertex.push(radius * z);
+			vertex.push(u);
+			vertex.push(v);
 		}
 	}
+	
+    var VERTEX= GL.createBuffer ();
+    GL.bindBuffer(GL.ARRAY_BUFFER, VERTEX);
+    GL.bufferData(GL.ARRAY_BUFFER,new Float32Array(vertex),GL.STATIC_DRAW);
+    
+    //FACES :
+   	
+	var faces = [];
+	for (var latNumber=0; latNumber < latitudeBands; latNumber++) {
+		for (var longNumber=0; longNumber < longitudeBands; longNumber++) {
+			var first = (latNumber * (longitudeBands + 1)) + longNumber;
+			var second = first + longitudeBands + 1;
+			faces.push(first);
+			faces.push(second);
+			faces.push(first + 1);
+
+			faces.push(second);
+			faces.push(second + 1);
+			faces.push(first + 1);
+		}
+	}
+	
+  var FACES= GL.createBuffer ();
+  GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, FACES);
+  GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, new Uint16Array(faces), GL.STATIC_DRAW);
+				
   /*========================= MATRIX ========================= */
   
   var PROJMATRIX=LIBS.get_projection(40, CANVAS.width/CANVAS.height, 1, 100);
@@ -286,14 +225,16 @@ void main(void) {\n\
   var time_old=0;
   var animate=function(time) {
     var dt=time-time_old;
-    if (!drag) {
+    /*if (!drag) {
       dX*=AMORTIZATION, dY*=AMORTIZATION;
       THETA+=dX, PHI+=dY;
     }
     LIBS.set_I4(MOVEMATRIX);
     LIBS.rotateY(MOVEMATRIX, THETA);
-    LIBS.rotateX(MOVEMATRIX, PHI);
-    time_old=time;
+    LIBS.rotateX(MOVEMATRIX, PHI);*/
+    LIBS.rotateY(MOVEMATRIX, dt*0.002);
+	
+	time_old=time;
     
     GL.viewport(0.0, 0.0, CANVAS.width, CANVAS.height);
     GL.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
@@ -306,12 +247,12 @@ void main(void) {\n\
             
             GL.bindTexture(GL.TEXTURE_2D, cube_texture.webglTexture);
         }
-    GL.bindBuffer(GL.ARRAY_BUFFER, CUBE_VERTEX);  
+    GL.bindBuffer(GL.ARRAY_BUFFER, VERTEX);  
     GL.vertexAttribPointer(_position, 3, GL.FLOAT, false,4*(3+2),0) ;    
     GL.vertexAttribPointer(_uv, 2, GL.FLOAT, false,4*(3+2),3*4) ;        
       
-    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, CUBE_FACES);
-    GL.drawElements(GL.TRIANGLES, 6*2*3, GL.UNSIGNED_SHORT, 0);
+    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, FACES);
+    GL.drawElements(GL.TRIANGLES, faces.length , GL.UNSIGNED_SHORT, 0);
     
     GL.flush();
     window.requestAnimationFrame(animate);
