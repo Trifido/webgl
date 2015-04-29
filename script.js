@@ -152,8 +152,8 @@ void main(void) {\n\
         return image;
     };
     
-    var terra_texture=get_texture("ressources/texture.png");
-	var moon_texture=get_texture("ressources/texture.png");
+    var terra_texture=get_texture("ressources/tierra.jpg");
+	var moon_texture=get_texture("ressources/luna.jpg");
     
     
   /*========================= DRAWING ========================= */
