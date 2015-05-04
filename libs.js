@@ -70,8 +70,20 @@ var LIBS={
     m[9]=c*m[9]+s*mv8;
   },
   
+  set_position: function(m,x,y,z) {
+    m[12]=x, m[13]=y, m[14]=z;
+  },
+  
   translateZ: function(m, t){
     m[14]+=t;
+  },
+  
+  translateY: function(m, t){
+    m[13]+=t;
+  },
+  
+  translateX: function(m, t){
+    m[12]+=t;
   },
   
 };

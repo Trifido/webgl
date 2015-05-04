@@ -1,21 +1,82 @@
-/* Primer intento de algo orientao a objetos */
+////////////////////////////////////////////////////////////////////////////////////////
+//
+//		CLASE ESFERA
+//
+////////////////////////////////////////////////////////////////////////////////////////
 
-function Sphere(rad,rots){
+function Sphere( rad,rots,GL,url ){
 	
+	//////////////////////
+	// Parametros de creacion de la esfera
 	this.radio = rad;
 	this.rotaciones = rots;
+	this.url = url;
 	
-	this.vertex = CALCULOS.sphere_vertex(this.radio,this.rotaciones);
-	this.faces = CALCULOS.sphere_faces(rots);
+	//////////////////////
+	// Matriz de movimiento de la esfera
+	this.MOVEMATRIX = LIBS.get_I4();
+	
+	//////////////////////
+	// Constructores
+	this.vertex = INITS.sphere_vertex(this.radio,this.rotaciones);
+	this.faces = INITS.sphere_faces(rots);
+	this.texture = INITS.init_texture(this.url,GL);
+	
+	this.VERTEX = GL.createBuffer();
+	this.FACES= GL.createBuffer ();
+	this.init_things( GL );
+	
+}
+
+////////////////////////////////////////
+// FUNCION DE LA CLASE ESFERA
+// Activa la textura de la esfera
+Sphere.prototype.draw_texture = function( GL ){
+
+	if (this.texture.webglTexture) {
+        
+		GL.activeTexture(GL.TEXTURE0);
 		
-}
-
-Sphere.prototype.draw = function(){
-	//alert("ok");
+		GL.bindTexture(GL.TEXTURE_2D, this.texture.webglTexture);
+	}
 	
 }
 
-var CALCULOS = {
+////////////////////////////////////////
+// FUNCION DE LA CLASE ESFERA
+// Activa los parametros de this
+Sphere.prototype.draw = function( GL,_position,_uv ){
+	
+	this.draw_texture( GL );
+	
+	GL.bindBuffer(GL.ARRAY_BUFFER, this.VERTEX);  
+    GL.vertexAttribPointer(_position, 3, GL.FLOAT, false,4*(3+2),0) ;    
+    GL.vertexAttribPointer(_uv, 2, GL.FLOAT, false,4*(3+2),3*4) ;
+    
+	GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, this.FACES);
+    GL.drawElements(GL.TRIANGLES, this.faces.length , GL.UNSIGNED_SHORT, 0);
+	
+}
+
+////////////////////////////////////////
+// FUNCION DE LA CLASE ESFERA
+// Inicializa los buffers
+Sphere.prototype.init_things = function( GL ){
+	
+	GL.bindBuffer(GL.ARRAY_BUFFER, this.VERTEX);
+	GL.bufferData(GL.ARRAY_BUFFER,new Float32Array(this.vertex),GL.STATIC_DRAW);
+	GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, this.FACES);
+	GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.faces), GL.STATIC_DRAW);
+	
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//
+//		CALCULOS PARA CONSTRUCTOR ESFERA
+//
+////////////////////////////////////////////////////////////////////////////////////////
+
+var INITS = {
 	
 	sphere_faces: function(rots){
 	
@@ -67,7 +128,28 @@ var CALCULOS = {
 		}
 	}
 	return vertex;
-  }
+  },
+	
+	init_texture: function(image_URL,GL){    
+    
+        var image=new Image();        
+        image.src=image_URL;
+        image.webglTexture=false;        
+        
+        image.onload=function(e) {
+            var texture=GL.createTexture();     
+            GL.pixelStorei(GL.UNPACK_FLIP_Y_WEBGL, true);
+            GL.bindTexture(GL.TEXTURE_2D, texture);            
+            GL.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA, GL.RGBA, GL.UNSIGNED_BYTE, image);            
+            GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);            
+            GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.NEAREST_MIPMAP_LINEAR);
+            GL.generateMipmap(GL.TEXTURE_2D);
+            GL.bindTexture(GL.TEXTURE_2D, null);            
+            image.webglTexture=texture;
+        };
+        
+        return image;
+    }
 	
 };
 

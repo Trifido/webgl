@@ -6,39 +6,18 @@ var main=function() {
   
   /*========================= CAPTURE MOUSE EVENTS ========================= */
   
-  var AMORTIZATION=0.95;
-  var drag=false;
-  var old_x, old_y;
-  var dX=0, dY=0;
-  
-  var mouseDown=function(e) {
-    drag=true;
-    old_x=e.pageX, old_y=e.pageY;
-    e.preventDefault();
-    return false;
+  //////////////////////
+  // Click del raton
+  var rotate = true;
+  var mouseDown=function( e ) {
+    
+	( rotate == true ) ? rotate = false : rotate = true;
+	
   };
-  
-  var mouseUp=function(e){
-    drag=false;
-  };
-  
-  var mouseMove=function(e) {
-    if (!drag) return false;
-    dX=(e.pageX-old_x)*Math.PI/CANVAS.width,
-      dY=(e.pageY-old_y)*Math.PI/CANVAS.height;
-    THETA+=dX;
-    PHI+=dY;
-    old_x=e.pageX, old_y=e.pageY;
-    e.preventDefault();
-  };
-  
-  CANVAS.addEventListener("mousedown", mouseDown, false);
-  CANVAS.addEventListener("mouseup", mouseUp, false);
-  CANVAS.addEventListener("mouseout", mouseUp, false);
-  CANVAS.addEventListener("mousemove", mouseMove, false);
+  CANVAS.addEventListener( "mousedown", mouseDown, false );
   
   /*========================= GET WEBGL CONTEXT ========================= */
-  var GL;
+  var GL; // <---- MALDITA VARIABLE!!!!! TODA LA CULPA ES TUYAAAAAAAAAAAA
   try {
     GL = CANVAS.getContext("experimental-webgl", {antialias: true});
   } catch (e) {
@@ -47,7 +26,6 @@ var main=function() {
   }
   
   /*========================= SHADERS ========================= */
-  /*jshint multistr: true */
   
   var shader_vertex_source="\n\
 attribute vec3 position;\n\
@@ -104,135 +82,67 @@ void main(void) {\n\
   
   GL.useProgram(SHADER_PROGRAM);
   GL.uniform1i(_sampler, 0);
-  				
+
   /*========================= MATRIX ========================= */
   
   var PROJMATRIX=LIBS.get_projection(40, CANVAS.width/CANVAS.height, 1, 100);
-  var MOVEMATRIX=LIBS.get_I4();
-  var MOVEMATRIX_MOON=LIBS.get_I4();
   var VIEWMATRIX=LIBS.get_I4();
   
   LIBS.translateZ(VIEWMATRIX, -6);
-  var THETA=0,
-      PHI=0;
-  
-  /*========================= TEXTURES ========================= */    
-    var get_texture=function(image_URL){
-    
-    
-        var image=new Image();
-        
-        image.src=image_URL;
-        image.webglTexture=false;
-        
-        
-        image.onload=function(e) {
-        
-        
-
-            var texture=GL.createTexture();
-            
-            GL.pixelStorei(GL.UNPACK_FLIP_Y_WEBGL, true);
-            
-            
-            GL.bindTexture(GL.TEXTURE_2D, texture);
-            
-            GL.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA, GL.RGBA, GL.UNSIGNED_BYTE, image);
-            
-            GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
-            
-            GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.NEAREST_MIPMAP_LINEAR);
-
-            GL.generateMipmap(GL.TEXTURE_2D);
-
-            GL.bindTexture(GL.TEXTURE_2D, null);
-            
-            image.webglTexture=texture;
-        };
-        
-        return image;
-    };
-    
-    var terra_texture=get_texture("ressources/tierra.jpg");
-	var moon_texture=get_texture("ressources/luna.jpg");
-    
     
   /*========================= DRAWING ========================= */
-  GL.enable(GL.DEPTH_TEST);
-  GL.depthFunc(GL.LEQUAL);
-  GL.clearColor(0.0, 0.0, 0.0, 0.0);
-  GL.clearDepth(1.0);
-
-	var terra = new Sphere(1,30);
-	var moon = new Sphere(0.2,30);
+  GL.enable( GL.DEPTH_TEST );
+  GL.depthFunc( GL.LEQUAL );
+  GL.clearColor( 0.0, 0.0, 0.0, 0.0 );
+  GL.clearDepth( 1.0 );
 	
+	//////////////////////
+	// Init planetas
+	var terra = new Sphere( 1,30,GL,"ressources/tierra.jpg" );
+	var moon = new Sphere( 0.2,30,GL,"ressources/luna.jpg" );
+	//////////////////////
+	// Variable para la orbita de la luna
+	var angulo = 0;
 	//////////////////////
 	
   var time_old=0;
-  var animate=function(time) {
-    var dt=time-time_old;
-    /*if (!drag) {
-      dX*=AMORTIZATION, dY*=AMORTIZATION;
-      THETA+=dX, PHI+=dY;
-    }
-    LIBS.set_I4(MOVEMATRIX);
-   	LIBS.rotateY(MOVEMATRIX, THETA);
-    LIBS.rotateX(MOVEMATRIX, PHI);*/
-    LIBS.rotateY(MOVEMATRIX, dt*0.002);
+  var animate=function( time ) {
+	  
+    var dt= ( time-time_old ) / 1000;
 	
 	time_old=time;
-    
-    GL.viewport(0.0, 0.0, CANVAS.width, CANVAS.height);
-    GL.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
-    GL.uniformMatrix4fv(_Pmatrix, false, PROJMATRIX);
-    GL.uniformMatrix4fv(_Vmatrix, false, VIEWMATRIX);
-    GL.uniformMatrix4fv(_Mmatrix, false, MOVEMATRIX);
-		
+    GL.viewport( 0.0, 0.0, CANVAS.width, CANVAS.height );
+    GL.clear( GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT );
+    GL.uniformMatrix4fv( _Pmatrix, false, PROJMATRIX );
+    GL.uniformMatrix4fv( _Vmatrix, false, VIEWMATRIX );
+	
+	////////////////////////////////////////////
 	//TIERRA
-	if (terra_texture.webglTexture) {
-        
-		GL.activeTexture(GL.TEXTURE0);
-		
-		GL.bindTexture(GL.TEXTURE_2D, terra_texture.webglTexture);
-	}
-	terra.TERRA_VERTEX = GL.createBuffer();
-	GL.bindBuffer(GL.ARRAY_BUFFER, terra.TERRA_VERTEX);
-	GL.bufferData(GL.ARRAY_BUFFER,new Float32Array(terra.vertex),GL.STATIC_DRAW);
+	//////////////////////
+	// Movimiento de la tierra
+	LIBS.rotateY( terra.MOVEMATRIX, dt );
+	//////////////////////
+	// Activar matriz de movimiento de la tierra
+	GL.uniformMatrix4fv( _Mmatrix, false, terra.MOVEMATRIX );
+	//////////////////////
+	// Dibujar la tierra
+	terra.draw( GL,_position,_uv );
 	
-	terra.TERRA_FACES= GL.createBuffer ();
-	GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, terra.TERRA_FACES);
-	GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, new Uint16Array(terra.faces), GL.STATIC_DRAW);
-	GL.bindBuffer(GL.ARRAY_BUFFER, terra.TERRA_VERTEX);  
-    GL.vertexAttribPointer(_position, 3, GL.FLOAT, false,4*(3+2),0) ;    
-    GL.vertexAttribPointer(_uv, 2, GL.FLOAT, false,4*(3+2),3*4) ;
-    
-	GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, terra.TERRA_FACES);
-    GL.drawElements(GL.TRIANGLES, terra.faces.length , GL.UNSIGNED_SHORT, 0);
-   
+	////////////////////////////////////////////
     // MOON
-	
-	if (moon_texture.webglTexture) {
-        
-		GL.activeTexture(GL.TEXTURE0);
-		
-		GL.bindTexture(GL.TEXTURE_2D, moon_texture.webglTexture);
+	// Movimiento de la luna
+	if( rotate ){ 		// Ir a la linea 7 para entender esto
+		LIBS.set_position( moon.MOVEMATRIX,2*Math.cos( angulo ),0, 2*Math.sin( angulo ) );
+		angulo = ( angulo + 0.01 ) % 360;
 	}
+	LIBS.rotateY(moon.MOVEMATRIX, dt);
+	//////////////////////
+	// Activar matriz de movimiento de la luna
+	GL.uniformMatrix4fv( _Mmatrix, false, moon.MOVEMATRIX );
+	//////////////////////
+	// Activar parametros de la luna y dibujar.
+	moon.draw( GL,_position,_uv );
 	
-	moon.MOON_VERTEX = GL.createBuffer();
-	GL.bindBuffer(GL.ARRAY_BUFFER, moon.MOON_VERTEX);
-	GL.bufferData(GL.ARRAY_BUFFER,new Float32Array(moon.vertex),GL.STATIC_DRAW);
-	
-	moon.MOON_FACES= GL.createBuffer ();
-	GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, moon.MOON_FACES);
-	GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, new Uint16Array(moon.faces), GL.STATIC_DRAW);
-	GL.bindBuffer(GL.ARRAY_BUFFER, moon.MOON_VERTEX);  
-    
-	GL.vertexAttribPointer(_position, 3, GL.FLOAT, false,4*(3+2),0) ;    
-    GL.vertexAttribPointer(_uv, 2, GL.FLOAT, false,4*(3+2),3*4) ;
-	
-	GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, moon.MOON_FACES);
-    GL.drawElements(GL.TRIANGLES, moon.faces.length , GL.UNSIGNED_SHORT, 0);
-    
 	GL.flush();
     window.requestAnimationFrame(animate);
   };
