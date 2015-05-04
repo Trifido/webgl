@@ -109,6 +109,7 @@ void main(void) {\n\
   
   var PROJMATRIX=LIBS.get_projection(40, CANVAS.width/CANVAS.height, 1, 100);
   var MOVEMATRIX=LIBS.get_I4();
+  var MOVEMATRIX_MOON=LIBS.get_I4();
   var VIEWMATRIX=LIBS.get_I4();
   
   LIBS.translateZ(VIEWMATRIX, -6);
@@ -161,7 +162,12 @@ void main(void) {\n\
   GL.depthFunc(GL.LEQUAL);
   GL.clearColor(0.0, 0.0, 0.0, 0.0);
   GL.clearDepth(1.0);
-  
+
+	var terra = new Sphere(1,30);
+	var moon = new Sphere(0.2,30);
+	
+	//////////////////////
+	
   var time_old=0;
   var animate=function(time) {
     var dt=time-time_old;
@@ -170,7 +176,7 @@ void main(void) {\n\
       THETA+=dX, PHI+=dY;
     }
     LIBS.set_I4(MOVEMATRIX);
-    LIBS.rotateY(MOVEMATRIX, THETA);
+   	LIBS.rotateY(MOVEMATRIX, THETA);
     LIBS.rotateX(MOVEMATRIX, PHI);*/
     LIBS.rotateY(MOVEMATRIX, dt*0.002);
 	
@@ -181,34 +187,53 @@ void main(void) {\n\
     GL.uniformMatrix4fv(_Pmatrix, false, PROJMATRIX);
     GL.uniformMatrix4fv(_Vmatrix, false, VIEWMATRIX);
     GL.uniformMatrix4fv(_Mmatrix, false, MOVEMATRIX);
-        if (terra_texture.webglTexture) {
-        
-            GL.activeTexture(GL.TEXTURE0);
-            
-            GL.bindTexture(GL.TEXTURE_2D, terra_texture.webglTexture);
-        }
 		
 	//TIERRA
-	var terra_vertex = LIBS.sphere_vertex(2,30); 
+	if (terra_texture.webglTexture) {
+        
+		GL.activeTexture(GL.TEXTURE0);
+		
+		GL.bindTexture(GL.TEXTURE_2D, terra_texture.webglTexture);
+	}
+	terra.TERRA_VERTEX = GL.createBuffer();
+	GL.bindBuffer(GL.ARRAY_BUFFER, terra.TERRA_VERTEX);
+	GL.bufferData(GL.ARRAY_BUFFER,new Float32Array(terra.vertex),GL.STATIC_DRAW);
 	
-    var TERRA_VERTEX= GL.createBuffer ();
-    GL.bindBuffer(GL.ARRAY_BUFFER, TERRA_VERTEX);
-    GL.bufferData(GL.ARRAY_BUFFER,new Float32Array(terra_vertex),GL.STATIC_DRAW);
-   	
-	var terra_faces = LIBS.sphere_faces(30);
-	
-  	var TERRA_FACES= GL.createBuffer ();
-  	GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, TERRA_FACES);
-  	GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, new Uint16Array(terra_faces), GL.STATIC_DRAW);	
-	
-    GL.bindBuffer(GL.ARRAY_BUFFER, TERRA_VERTEX);  
+	terra.TERRA_FACES= GL.createBuffer ();
+	GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, terra.TERRA_FACES);
+	GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, new Uint16Array(terra.faces), GL.STATIC_DRAW);
+	GL.bindBuffer(GL.ARRAY_BUFFER, terra.TERRA_VERTEX);  
     GL.vertexAttribPointer(_position, 3, GL.FLOAT, false,4*(3+2),0) ;    
-    GL.vertexAttribPointer(_uv, 2, GL.FLOAT, false,4*(3+2),3*4) ;        
-      
-    GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, TERRA_FACES);
-    GL.drawElements(GL.TRIANGLES, terra_faces.length , GL.UNSIGNED_SHORT, 0);
+    GL.vertexAttribPointer(_uv, 2, GL.FLOAT, false,4*(3+2),3*4) ;
     
-    GL.flush();
+	GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, terra.TERRA_FACES);
+    GL.drawElements(GL.TRIANGLES, terra.faces.length , GL.UNSIGNED_SHORT, 0);
+   
+    // MOON
+	
+	if (moon_texture.webglTexture) {
+        
+		GL.activeTexture(GL.TEXTURE0);
+		
+		GL.bindTexture(GL.TEXTURE_2D, moon_texture.webglTexture);
+	}
+	
+	moon.MOON_VERTEX = GL.createBuffer();
+	GL.bindBuffer(GL.ARRAY_BUFFER, moon.MOON_VERTEX);
+	GL.bufferData(GL.ARRAY_BUFFER,new Float32Array(moon.vertex),GL.STATIC_DRAW);
+	
+	moon.MOON_FACES= GL.createBuffer ();
+	GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, moon.MOON_FACES);
+	GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, new Uint16Array(moon.faces), GL.STATIC_DRAW);
+	GL.bindBuffer(GL.ARRAY_BUFFER, moon.MOON_VERTEX);  
+    
+	GL.vertexAttribPointer(_position, 3, GL.FLOAT, false,4*(3+2),0) ;    
+    GL.vertexAttribPointer(_uv, 2, GL.FLOAT, false,4*(3+2),3*4) ;
+	
+	GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, moon.MOON_FACES);
+    GL.drawElements(GL.TRIANGLES, moon.faces.length , GL.UNSIGNED_SHORT, 0);
+    
+	GL.flush();
     window.requestAnimationFrame(animate);
   };
   animate(0);
