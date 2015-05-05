@@ -45,13 +45,14 @@ Sphere.prototype.draw_texture = function( GL ){
 ////////////////////////////////////////
 // FUNCION DE LA CLASE ESFERA
 // Activa los parametros de this
-Sphere.prototype.draw = function( GL,_position,_uv ){
+Sphere.prototype.draw = function( GL,_position,_uv,_normal ){
 	
 	this.draw_texture( GL );
 	
 	GL.bindBuffer(GL.ARRAY_BUFFER, this.VERTEX);  
-    GL.vertexAttribPointer(_position, 3, GL.FLOAT, false,4*(3+2),0) ;    
-    GL.vertexAttribPointer(_uv, 2, GL.FLOAT, false,4*(3+2),3*4) ;
+    GL.vertexAttribPointer(_position, 3, GL.FLOAT, false,4*(3+2+3),0) ;    
+    GL.vertexAttribPointer(_normal, 3, GL.FLOAT, false,4*(3+2+3),3*4) ;
+	GL.vertexAttribPointer(_uv, 2, GL.FLOAT, false,4*(3+2+3),6*4) ;
     
 	GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, this.FACES);
     GL.drawElements(GL.TRIANGLES, this.faces.length , GL.UNSIGNED_SHORT, 0);
@@ -123,8 +124,14 @@ var INITS = {
 			vertex.push(radius * x);
 			vertex.push(radius * y);
 			vertex.push(radius * z);
+			
+			vertex.push(x);
+			vertex.push(y);
+			vertex.push(z);
+			
 			vertex.push(u);
 			vertex.push(v);
+			
 		}
 	}
 	return vertex;
