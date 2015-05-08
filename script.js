@@ -126,8 +126,8 @@ void main(void) {\n\
 	
 	//////////////////////
 	// Init planetas
-	var terra = new Sphere( 1,30,GL,"ressources/tierra.jpg" );
-	var moon = new Sphere( 0.2,30,GL,"ressources/luna.jpg" );
+	var terra = new Sphere( 1,90,GL,"ressources/tierra.jpg" );
+	var moon = new Sphere( 0.2,90,GL,"ressources/luna.jpg" );
 	//////////////////////
 	// Variable para la orbita de la luna
 	var angulo = 0;
@@ -160,10 +160,17 @@ void main(void) {\n\
     // MOON
 	// Movimiento de la luna
 	if( rotate ){ 		// Ir a la linea 7 para entender esto
-		LIBS.set_position( moon.MOVEMATRIX,2*Math.cos( angulo ),0, 2*Math.sin( angulo ) );
-		angulo = ( angulo + 0.01 ) % 360;
+		
+		var matrix_trans = LIBS.get_I4();
+		var matrix_rot = LIBS.get_I4();
+		LIBS.translateZ( matrix_trans, 2 );
+		LIBS.rotateY( matrix_rot,angulo );
+		
+		moon.MOVEMATRIX = LIBS.multiply( matrix_trans,matrix_rot );
+		
+		//LIBS.set_position( moon.MOVEMATRIX,2*Math.cos( angulo ),0, 2*Math.sin( angulo ) );
+		angulo = ( angulo + 0.02 ) % 360;
 	}
-	LIBS.rotateY(moon.MOVEMATRIX, dt);
 	//////////////////////
 	// Activar matriz de movimiento de la luna
 	GL.uniformMatrix4fv( _Mmatrix, false, moon.MOVEMATRIX );
