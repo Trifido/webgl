@@ -126,8 +126,8 @@ void main(void) {\n\
 	
 	//////////////////////
 	// Init planetas
-	var terra = new Sphere( 1,90,GL,"ressources/tierra.jpg" );
-	var moon = new Sphere( 0.2,90,GL,"ressources/luna.jpg" );
+	var terra = new Sphere( 1,90,GL,"ressources/tierra.jpg" );//new Planeta(1,GL,"ressources/tierra.jpg" );//new Sphere( 1,90,GL,"ressources/tierra.jpg" );
+	var moon = new Planeta(0.2,GL,"ressources/luna.jpg" );//new Sphere( 0.2,90,GL,"ressources/luna.jpg" );
 	//////////////////////
 	// Variable para la orbita de la luna
 	var angulo = 0;
@@ -149,9 +149,11 @@ void main(void) {\n\
 	//////////////////////
 	// Movimiento de la tierra
 	LIBS.rotateY( terra.MOVEMATRIX, dt );
+	//LIBS.rotateY( terra.getMoveMatrix(), dt );
 	//////////////////////
 	// Activar matriz de movimiento de la tierra
 	GL.uniformMatrix4fv( _Mmatrix, false, terra.MOVEMATRIX );
+	//GL.uniformMatrix4fv( _Mmatrix, false, terra.getMoveMatrix() );
 	//////////////////////
 	// Dibujar la tierra
 	terra.draw( GL,_position,_uv,_normal );
@@ -167,6 +169,7 @@ void main(void) {\n\
 		LIBS.rotateY( matrix_rot,angulo );
 		
 		moon.MOVEMATRIX = LIBS.multiply( matrix_trans,matrix_rot );
+		//moon.getMoveMatrix() = LIBS.multiply( matrix_trans,matrix_rot );
 		
 		//LIBS.set_position( moon.MOVEMATRIX,2*Math.cos( angulo ),0, 2*Math.sin( angulo ) );
 		angulo = ( angulo + 0.02 ) % 360;
@@ -174,6 +177,7 @@ void main(void) {\n\
 	//////////////////////
 	// Activar matriz de movimiento de la luna
 	GL.uniformMatrix4fv( _Mmatrix, false, moon.MOVEMATRIX );
+	//GL.uniformMatrix4fv( _Mmatrix, false, moon.getMoveMatrix() );
 	//////////////////////
 	// Activar parametros de la luna y dibujar.
 	moon.draw( GL,_position,_uv,_normal );
@@ -182,4 +186,5 @@ void main(void) {\n\
     window.requestAnimationFrame(animate);
   };
   animate(0);
+  alert("okkkkkk");
 };

@@ -5,7 +5,6 @@
 ////////////////////////////////////////////////////////////////////////////////////////
 
 function Sphere( rad,rots,GL,url ){
-	
 	//////////////////////
 	// Parametros de creacion de la esfera
 	this.radio = rad;
@@ -32,7 +31,6 @@ function Sphere( rad,rots,GL,url ){
 // FUNCION DE LA CLASE ESFERA
 // Activa la textura de la esfera
 Sphere.prototype.draw_texture = function( GL ){
-
 	if (this.texture.webglTexture) {
         
 		GL.activeTexture(GL.TEXTURE0);
@@ -68,7 +66,6 @@ Sphere.prototype.init_things = function( GL ){
 	GL.bufferData(GL.ARRAY_BUFFER,new Float32Array(this.vertex),GL.STATIC_DRAW);
 	GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, this.FACES);
 	GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.faces), GL.STATIC_DRAW);
-	
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
