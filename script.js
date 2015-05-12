@@ -127,12 +127,12 @@ void main(void) {\n\
 	//////////////////////
 	// Init planetas
 	var terra = new Planeta(1,GL,"ressources/tierra.jpg" );
-	var moon = new Satelite(0.2,GL,"ressources/luna.jpg" );
+	var luna = new Satelite(0.2,GL,"ressources/luna.jpg" );
 
-	var grupoOrbital = new GrupoOrbital(GL, terra, moon, _Mmatrix, _Pmatrix, PROJMATRIX, VIEWMATRIX);
+	var grupoOrbital = new GrupoOrbital(terra, luna, _Mmatrix, _Pmatrix, PROJMATRIX, VIEWMATRIX, CANVAS);
 	
-	//grupoOrbital.addDatPlaneta( _position,_uv,_normal );
-	//grupoOrbital.addDatSatelite( _position,_uv,_normal );
-	//grupoOrbital.draw( GL, time, rotate );
+	grupoOrbital.addDatPlaneta( _position,_uv,_normal );
+	grupoOrbital.addDatSatelite( _position,_uv,_normal );
+	grupoOrbital.draw( GL, 0, rotate );
   //animate(0);
 };
