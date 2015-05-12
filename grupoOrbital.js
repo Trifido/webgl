@@ -1,58 +1,84 @@
 
-function GrupoOrbital(GL, terra, luna){
-	//////////////////////
+function GrupoOrbital(GL, terra, luna, _Mmatrix, _Pmatrix, PROJMATRIX, VIEWMATRIX){
+	alert("Ok");
+
 	// Parametros de creacion del grupo orbital
+	this._Mmatrix = _Mmatrix;
+	this._Pmatrix = _Pmatrix;
+	this.PROJMATRIX = PROJMATRIX;
+	this.VIEWMATRIX = VIEWMATRIX;
 	this.luna= luna;
 	this.terra= terra;
+	this.angulo= 0;
+	this.time_old= 0;
+	this._positionP;
+	this._uvP;
+	this._normalP;
+	this._positionS;
+	this._uvS;
+	this._normalS;
+	alert("okkkk");
 }
 
-GrupoOrbital.prototype.draw = function( GL, time, angulo){
+GrupoOrbital.prototype.addDatPlaneta( _position,_uv,_normal ){
+	this._positionP = _position;
+	this._uvP = _uv;
+	this._normalP = _normal;
+}
+
+GrupoOrbital.prototype.addDatSatelite( _position,_uv,_normal ){
+	this._positionS = _position;
+	this._uvS = _uv;
+	this._normalS = _normal;
+}
+
+GrupoOrbital.prototype.animate=function( GL, time, rotate ) {
 	  
     var dt= ( time-time_old ) / 1000;
 	
 	time_old=time;
     GL.viewport( 0.0, 0.0, CANVAS.width, CANVAS.height );
     GL.clear( GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT );
-    GL.uniformMatrix4fv( _Pmatrix, false, PROJMATRIX );
-    GL.uniformMatrix4fv( _Vmatrix, false, VIEWMATRIX );
+    GL.uniformMatrix4fv( this._Pmatrix, false, this.PROJMATRIX );
+    GL.uniformMatrix4fv( this._Vmatrix, false, this.VIEWMATRIX );
 	
 	////////////////////////////////////////////
 	//TIERRA
 	//////////////////////
 	// Movimiento de la tierra
 	LIBS.rotateY( this.terra.MOVEMATRIX, dt );
-	//LIBS.rotateY( terra.getMoveMatrix(), dt );
 	//////////////////////
 	// Activar matriz de movimiento de la tierra
-	GL.uniformMatrix4fv( _Mmatrix, false, terra.MOVEMATRIX );
-	//GL.uniformMatrix4fv( _Mmatrix, false, terra.getMoveMatrix() );
+	GL.uniformMatrix4fv( this._Mmatrix, false, this.terra.MOVEMATRIX );
 	//////////////////////
 	// Dibujar la tierra
-	terra.draw( GL,_position,_uv,_normal );
+	this.terra.draw( GL,this._positionP,this._uvP,this._normalP );
 	
 	////////////////////////////////////////////
     // MOON
 	// Movimiento de la luna
-	if( rotate ){ 		// Ir a la linea 7 para entender esto
+	if( rotate ){	
 		var matrix_trans = LIBS.get_I4();
 		var matrix_rot = LIBS.get_I4();
 		LIBS.translateZ( matrix_trans, 2 );
-		LIBS.rotateY( matrix_rot,angulo );
+		LIBS.rotateY( matrix_rot,this.angulo );
 		
-		moon.MOVEMATRIX = LIBS.multiply( matrix_trans,matrix_rot );
-		//moon.getMoveMatrix() = LIBS.multiply( matrix_trans,matrix_rot );
-		
-		//LIBS.set_position( moon.MOVEMATRIX,2*Math.cos( angulo ),0, 2*Math.sin( angulo ) );
-		angulo = ( angulo + 0.02 ) % 360;
+		this.moon.setMoveMatrix( LIBS.multiply( matrix_trans,matrix_rot ));
+		this.angulo = ( this.angulo + 0.02 ) % 360;
 	}
 	//////////////////////
 	// Activar matriz de movimiento de la luna
-	GL.uniformMatrix4fv( _Mmatrix, false, moon.MOVEMATRIX );
-	//GL.uniformMatrix4fv( _Mmatrix, false, moon.getMoveMatrix() );
+	GL.uniformMatrix4fv( this._Mmatrix, false, this.moon.MOVEMATRIX );
 	//////////////////////
 	// Activar parametros de la luna y dibujar.
-	moon.draw( GL,_position,_uv,_normal );
+	this.moon.draw( GL,this._positionS,this._uvS,this._normalS );
 	
 	GL.flush();
     window.requestAnimationFrame(animate);
+}
+
+GrupoOrbital.prototype.draw = function( GL, time, rotate){
+	
+	animate(GL, 0, rotate);
+    
 }

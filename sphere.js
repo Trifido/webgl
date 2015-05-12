@@ -32,7 +32,6 @@ function Sphere( rad,rots,GL,url ){
 // Activa la textura de la esfera
 Sphere.prototype.draw_texture = function( GL ){
 	if (this.texture.webglTexture) {
-        
 		GL.activeTexture(GL.TEXTURE0);
 		
 		GL.bindTexture(GL.TEXTURE_2D, this.texture.webglTexture);

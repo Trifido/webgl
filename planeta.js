@@ -15,13 +15,9 @@ function Planeta(rad,GL,url){
 	
 	//////////////////////
 	// Constructores
-	this.sphere = new Sphere(this.rad,90,GL,this.url)
+	this.sphere = new Sphere(this.radio,90,GL,this.url);
 }
 
 Planeta.prototype.draw = function( GL,_position,_uv,_normal ){
-	return this.sphere.draw(GL,_position,_uv,_normal);
-}
-
-Planeta.prototype.getMoveMatrix = function( ){
-	return this.sphere.MOVEMATRIX;
+	this.sphere.draw(GL,_position,_uv,_normal);
 }

@@ -15,13 +15,13 @@ function Satelite(rad,GL,url){
 	
 	//////////////////////
 	// Constructores
-	this.sphere = new Sphere(this.rad,90,GL,this.url)
+	this.sphere = new Sphere(this.radio,90,GL,this.url)
 }
 
 Satelite.prototype.draw = function( GL,_position,_uv,_normal ){
 	return this.sphere.draw(GL,_position,_uv,_normal);
 }
 
-Satelite.prototype.getMoveMatrix = function( ){
-	return this.sphere.MOVEMATRIX;
+Satelite.prototype.setMoveMatrix = function( matr ){
+	this.MOVEMATRIX= matr;
 }
