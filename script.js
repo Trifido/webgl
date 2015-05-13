@@ -39,7 +39,7 @@ varying vec2 vUV;\n\
 varying vec3 vNormal;\n\
 varying vec3 vView;\n\
 \n\
-const vec3 uPointLightingLocation=vec3(3.0,0.0,-3.0);\n\
+const vec3 uPointLightingLocation=vec3(2.0,0.0,-6.0);\n\
 const vec3 uPointLightingColor=vec3(0.9,0.1,0.1);\n\
 varying vec3 vLightWeighting;\n\
 \n\
