@@ -17,7 +17,7 @@ var main=function() {
   CANVAS.addEventListener( "mousedown", mouseDown, false );
   
   /*========================= GET WEBGL CONTEXT ========================= */
-  var GL; // <---- MALDITA VARIABLE!!!!! TODA LA CULPA ES TUYAAAAAAAAAAAA
+  var GL;
   try {
     GL = CANVAS.getContext("experimental-webgl", {antialias: true});
   } catch (e) {
@@ -33,15 +33,26 @@ attribute vec3 normal;\n\
 uniform mat4 Pmatrix;\n\
 uniform mat4 Vmatrix;\n\
 uniform mat4 Mmatrix;\n\
+const mat3 uNMatrix = mat3(1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0);\n\
 attribute vec2 uv;\n\
 varying vec2 vUV;\n\
 varying vec3 vNormal;\n\
 varying vec3 vView;\n\
+\n\
+const vec3 uPointLightingLocation=vec3(3.0,0.0,-3.0);\n\
+const vec3 uPointLightingColor=vec3(0.9,0.1,0.1);\n\
+varying vec3 vLightWeighting;\n\
+\n\
 void main(void) { //pre-built function\n\
-gl_Position = Pmatrix*Vmatrix*Mmatrix*vec4(position, 1.);\n\
+vec4 mvPosition = Vmatrix*Mmatrix*vec4(position, 1.);\n\
+gl_Position = Pmatrix*mvPosition;\n\
+vec3 lightDirection = normalize(uPointLightingLocation - mvPosition.xyz);\n\
 vNormal=vec3(Mmatrix*vec4(normal, 0.));\n\
 vView=vec3(Vmatrix*Mmatrix*vec4(position, 1.));\n\
 vUV=uv;\n\
+vec3 transformedNormal = uNMatrix * vNormal;\n\
+float directionalLightWeighting = max(dot(transformedNormal, lightDirection), 0.0);\n\
+vLightWeighting = uPointLightingColor * directionalLightWeighting;\n\
 }";
   
   var shader_fragment_source="\n\
@@ -60,7 +71,7 @@ const vec3 mat_diffuse_color=vec3(1.,1.,1.);\n\
 const vec3 mat_specular_color=vec3(1.,1.,1.);\n\
 const float mat_shininess=10.;\n\
 \n\
-\n\
+varying vec3 vLightWeighting;\n\
 \n\
 void main(void) {\n\
     vec3 color=vec3(texture2D(sampler, vUV));\n\
@@ -72,7 +83,7 @@ void main(void) {\n\
 	\n\
 	vec3 I_specular=source_specular_color*mat_specular_color*pow(max(dot(R,V),0.), mat_shininess);\n\
 	vec3 I=I_ambient+I_diffuse+I_specular;\n\
-	gl_FragColor = vec4(I*color, 1.);\n\
+	gl_FragColor = vec4(I*color+vLightWeighting, 1.);\n\
 }";
   
   var get_shader=function(source, type, typeString) {
@@ -99,6 +110,7 @@ void main(void) {\n\
   var _Vmatrix = GL.getUniformLocation(SHADER_PROGRAM, "Vmatrix");
   var _Mmatrix = GL.getUniformLocation(SHADER_PROGRAM, "Mmatrix");
   var _sampler = GL.getUniformLocation(SHADER_PROGRAM, "sampler");
+  
   
   var _uv = GL.getAttribLocation(SHADER_PROGRAM, "uv");
   var _position = GL.getAttribLocation(SHADER_PROGRAM, "position");
@@ -127,7 +139,7 @@ void main(void) {\n\
 	////////////////////////////////////////////
 	// Init planetas
 	var terra = new Planeta(1,GL,"ressources/tierra.jpg" );
-	var moon = new Satelite(0.2,GL,"ressources/luna.jpg",2 );
+	var moon = new Satelite(0.2,GL,"ressources/luna.jpg",3 );
 	////////////////////////////////////////////
 	// Init grupo orbital
 	var grupoOrbital = new GrupoOrbital( _Mmatrix, _Pmatrix,_position,_uv,_normal );
