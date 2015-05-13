@@ -9,10 +9,10 @@ function Planeta(rad,GL,url){
 	// Parametros de creacion de la esfera
 	this.radio = rad;
 	this.url = url;
+	this.tipo = "p";
 	//////////////////////
 	// Matriz de movimiento de la esfera
 	this.MOVEMATRIX = LIBS.get_I4();
-	
 	//////////////////////
 	// Constructores
 	this.sphere = new Sphere(this.radio,90,GL,this.url);

@@ -4,11 +4,13 @@
 //
 ////////////////////////////////////////////////////////////////////////////////////////
 
-function Satelite(rad,GL,url){
+function Satelite(rad,GL,url,radio_orb){
 	//////////////////////
 	// Parametros de creacion de la esfera
 	this.radio = rad;
 	this.url = url;
+	this.tipo = "s";
+	this.radio_orbital = radio_orb;
 	//////////////////////
 	// Matriz de movimiento de la esfera
 	this.MOVEMATRIX = LIBS.get_I4();

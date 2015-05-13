@@ -7,7 +7,7 @@ var main=function() {
   /*========================= CAPTURE MOUSE EVENTS ========================= */
   
   //////////////////////
-  // Click del raton
+  // Click del raton 
   var rotate = true;
   var mouseDown=function( e ) {
     
@@ -124,15 +124,33 @@ void main(void) {\n\
   GL.clearColor( 0.0, 0.0, 0.0, 0.0 );
   GL.clearDepth( 1.0 );
 	
-	//////////////////////
+	////////////////////////////////////////////
 	// Init planetas
 	var terra = new Planeta(1,GL,"ressources/tierra.jpg" );
-	var luna = new Satelite(0.2,GL,"ressources/luna.jpg" );
-
-	var grupoOrbital = new GrupoOrbital(terra, luna, _Mmatrix, _Pmatrix, PROJMATRIX, VIEWMATRIX, CANVAS);
+	var moon = new Satelite(0.2,GL,"ressources/luna.jpg",2 );
+	////////////////////////////////////////////
+	// Init grupo orbital
+	var grupoOrbital = new GrupoOrbital( _Mmatrix, _Pmatrix,_position,_uv,_normal );
+	grupoOrbital.addAstro( terra );
+	grupoOrbital.addAstro( moon );
 	
-	grupoOrbital.addDatPlaneta( _position,_uv,_normal );
-	grupoOrbital.addDatSatelite( _position,_uv,_normal );
-	grupoOrbital.draw( GL, 0, rotate );
-  //animate(0);
+	////////////////////////////////////////////
+	// Init animacion
+	var time_old = 0;
+	var animate= function(time){
+		
+		var dt= ( time - time_old ) / 1000;
+		time_old=time;
+		GL.viewport( 0.0, 0.0, CANVAS.width, CANVAS.height );
+		GL.clear( GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT );
+		GL.uniformMatrix4fv( _Pmatrix, false, PROJMATRIX );
+		GL.uniformMatrix4fv( _Vmatrix, false, VIEWMATRIX );
+		
+		grupoOrbital.draw( GL,dt,rotate );
+		
+		GL.flush();
+		window.requestAnimationFrame(animate);
+		
+	}
+	animate(0);
 };
